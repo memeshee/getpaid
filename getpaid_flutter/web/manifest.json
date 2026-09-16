@@ -1,11 +1,11 @@
 {
-    "name": "getpaid_flutter",
-    "short_name": "getpaid_flutter",
+    "name": "GetPaid — invoices that chase themselves",
+    "short_name": "GetPaid",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#1B7A4A",
+    "description": "Invoices that chase themselves: scheduled reminders that stop the instant money arrives.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

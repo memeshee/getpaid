@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:getpaid_client/getpaid_client.dart';
 
 import '../client.dart';
@@ -104,7 +105,7 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
                       const SizedBox(height: 4),
                       Text(
                         'Due ${inv.dueDate.toIso8601String().substring(0, 10)}'
-                        '${paid ? ' · paid $paidTotal¢ total' : ''}',
+                        '${paid ? ' · paid ${money(paidTotal, inv.currency)}' : ''}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -154,6 +155,29 @@ class _InvoiceDetailScreenState extends State<InvoiceDetailScreen> {
                         text: r.tier.name.toUpperCase(),
                         color: tierColor(r.tier),
                       ),
+                      if (r.body != null && r.body!.isNotEmpty) ...[
+                        const SizedBox(width: 6),
+                        IconButton(
+                          icon: const Icon(Icons.copy, size: 16),
+                          tooltip: 'Copy reminder text',
+                          onPressed: () async {
+                            await Clipboard.setData(
+                              ClipboardData(
+                                text: '${r.subject ?? ''}\n\n${r.body}',
+                              ),
+                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Reminder text copied — paste it into any email to chase manually',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
                     ],
                   ),
                 ),

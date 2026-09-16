@@ -104,35 +104,30 @@ Future<List<Reminder>> runChaseStep(
 gp.Serverpod pod(Session session) => session.serverpod as gp.Serverpod;
 
 /// Schedule the three chase touches for an invoice (real-time path).
+/// Each tier gets its own future-call identifier so the three scheduled
+/// calls coexist — sharing one identifier would collapse them into one.
 Future<void> scheduleChase(Session session, int invoiceId) async {
   final fc = pod(session).futureCalls;
-  final payload = ChasePayload(invoiceId: invoiceId);
-  await fc
-      .callWithDelay(
-        Duration(days: chaseDelaysDays[ReminderTier.nudge]!),
-        identifier: _chaseId(invoiceId),
-      )
-      .chase
-      .checkChase(payload);
-  await fc
-      .callWithDelay(
-        Duration(days: chaseDelaysDays[ReminderTier.firm]!),
-        identifier: _chaseId(invoiceId),
-      )
-      .chase
-      .checkChase(payload);
-  await fc
-      .callWithDelay(
-        Duration(days: chaseDelaysDays[ReminderTier.finalNotice]!),
-        identifier: _chaseId(invoiceId),
-      )
-      .chase
-      .checkChase(payload);
+  for (final tier in ReminderTier.values) {
+    await fc
+        .callWithDelay(
+          Duration(days: chaseDelaysDays[tier]!),
+          identifier: chaseId(invoiceId, tier),
+        )
+        .chase
+        .checkChase(ChasePayload(invoiceId: invoiceId));
+  }
 }
 
 /// Cancel pending touches + mark unsent reminders skipped (on payment).
 Future<void> cancelChase(Session session, int invoiceId) async {
-  await pod(session).futureCalls.cancel(_chaseId(invoiceId));
+  final fc = pod(session).futureCalls;
+  // Current per-tier identifiers.
+  for (final tier in ReminderTier.values) {
+    await fc.cancel(chaseId(invoiceId, tier));
+  }
+  // Legacy single identifier (pre-fix schedules).
+  await fc.cancel(_legacyChaseId(invoiceId));
   final pending = await Reminder.db.find(
     session,
     where: (t) =>
@@ -147,4 +142,13 @@ Future<void> cancelChase(Session session, int invoiceId) async {
   }
 }
 
-String _chaseId(int invoiceId) => 'chase-$invoiceId';
+/// Per-tier future-call identifier: one scheduled call per tier so the
+/// three touches coexist as independent rows. (A shared identifier would
+/// also work — scheduling inserts rows without deduping, and cancel
+/// deletes every row with the identifier — but per-tier ids make each
+/// touch independently visible and cancellable.)
+String chaseId(int invoiceId, ReminderTier tier) =>
+    'chase-$invoiceId-${tier.name}';
+
+/// Identifier used by schedules created before per-tier ids existed.
+String _legacyChaseId(int invoiceId) => 'chase-$invoiceId';
