@@ -11,28 +11,31 @@ const Map<ReminderTier, int> chaseDelaysDays = {
 
 /// Copy shown to the freelancer for each tier (also stored on the Reminder).
 String tierSubject(ReminderTier tier, Invoice invoice) => switch (tier) {
-      ReminderTier.nudge =>
-        'Friendly nudge: invoice ${invoice.number} due ${invoice.dueDate.toIso8601String().substring(0, 10)}',
-      ReminderTier.firm =>
-        'Overdue: invoice ${invoice.number} needs your attention',
-      ReminderTier.finalNotice =>
-        'Final notice: invoice ${invoice.number} + late fee applies',
-    };
+  ReminderTier.nudge =>
+    'Friendly nudge: invoice ${invoice.number} due ${invoice.dueDate.toIso8601String().substring(0, 10)}',
+  ReminderTier.firm =>
+    'Overdue: invoice ${invoice.number} needs your attention',
+  ReminderTier.finalNotice =>
+    'Final notice: invoice ${invoice.number} + late fee applies',
+};
 
 String tierBody(ReminderTier tier, Invoice invoice, Customer client) {
   final amount = (invoice.amountCents / 100).toStringAsFixed(2);
   final due = invoice.dueDate.toIso8601String().substring(0, 10);
   return switch (tier) {
-    ReminderTier.nudge => 'Hi ${client.name},\n\nJust a friendly heads-up that '
-        'invoice ${invoice.number} for ${invoice.currency} $amount is due on $due.\n\n'
-        'Pay link / details in the original invoice. Thanks!',
-    ReminderTier.firm => 'Hi ${client.name},\n\nInvoice ${invoice.number} for '
-        '${invoice.currency} $amount was due on $due and is now overdue.\n\n'
-        'Please pay this week so we can keep things smooth.',
-    ReminderTier.finalNotice => 'Hi ${client.name},\n\nInvoice ${invoice.number} for '
-        '${invoice.currency} $amount is 14+ days overdue (due $due).\n\n'
-        'A late fee now applies per the invoice terms. Please pay within 48 hours '
-        'to avoid further action.',
+    ReminderTier.nudge =>
+      'Hi ${client.name},\n\nJust a friendly heads-up that '
+          'invoice ${invoice.number} for ${invoice.currency} $amount is due on $due.\n\n'
+          'Pay link / details in the original invoice. Thanks!',
+    ReminderTier.firm =>
+      'Hi ${client.name},\n\nInvoice ${invoice.number} for '
+          '${invoice.currency} $amount was due on $due and is now overdue.\n\n'
+          'Please pay this week so we can keep things smooth.',
+    ReminderTier.finalNotice =>
+      'Hi ${client.name},\n\nInvoice ${invoice.number} for '
+          '${invoice.currency} $amount is 14+ days overdue (due $due).\n\n'
+          'A late fee now applies per the invoice terms. Please pay within 48 hours '
+          'to avoid further action.',
   };
 }
 
@@ -58,8 +61,7 @@ Future<List<Reminder>> runChaseStep(
           session,
           where: (t) => ownerId == null
               ? t.status.equals(InvoiceStatus.sent)
-              : t.status.equals(InvoiceStatus.sent) &
-                  t.ownerId.equals(ownerId),
+              : t.status.equals(InvoiceStatus.sent) & t.ownerId.equals(ownerId),
         );
 
   for (final invoice in invoices) {
@@ -78,8 +80,7 @@ Future<List<Reminder>> runChaseStep(
 
     for (final tier in ReminderTier.values) {
       if (doneTiers.contains(tier)) continue;
-      final dueAt =
-          invoice.sentAt!.add(Duration(days: chaseDelaysDays[tier]!));
+      final dueAt = invoice.sentAt!.add(Duration(days: chaseDelaysDays[tier]!));
       if (now.isBefore(dueAt)) continue;
 
       final reminder = Reminder(
