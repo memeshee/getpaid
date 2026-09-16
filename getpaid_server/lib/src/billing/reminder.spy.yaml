@@ -1,0 +1,17 @@
+class: Reminder
+table: reminder
+fields:
+  invoiceId: int
+  tier: ReminderTier
+  status: ReminderStatus
+  ### When this touch becomes due.
+  dueAt: DateTime
+  ### When it was actually sent (null until sent).
+  sentAt: DateTime?
+  ### Subject line used.
+  subject: String?
+  ### Body used.
+  body: String?
+  ### True when produced by simulate() (judge time-lapse), not real time.
+  simulated: bool
+

@@ -1,0 +1,8 @@
+class: InvoiceItem
+table: invoice_item
+fields:
+  invoiceId: int
+  description: String
+  quantity: int
+  unitPriceCents: int
+

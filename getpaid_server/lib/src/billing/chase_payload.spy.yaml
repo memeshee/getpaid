@@ -1,0 +1,4 @@
+### Payload for a scheduled chase check (null invoiceId = sweep all).
+class: ChasePayload
+fields:
+  invoiceId: int?

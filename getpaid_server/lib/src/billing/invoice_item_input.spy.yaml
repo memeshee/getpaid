@@ -1,0 +1,6 @@
+class: InvoiceItemInput
+fields:
+  description: String
+  quantity: int
+  unitPriceCents: int
+

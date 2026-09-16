@@ -1,0 +1,13 @@
+class: Customer
+table: customer
+fields:
+  ### Owner's auth user id — every query is scoped to this.
+  ownerId: String
+  ### Display name (person or company).
+  name: String
+  ### Billing email — reminders go here.
+  email: String
+  ### Optional company name.
+  company: String?
+  createdAt: DateTime
+

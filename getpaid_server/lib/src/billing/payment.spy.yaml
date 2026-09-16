@@ -1,0 +1,10 @@
+class: Payment
+table: payment
+fields:
+  invoiceId: int
+  amountCents: int
+  paidAt: DateTime
+  method: String?
+  ### Receipt reference, e.g. GP-7-3.
+  receiptNo: String
+

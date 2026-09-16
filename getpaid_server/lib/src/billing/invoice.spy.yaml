@@ -1,0 +1,20 @@
+class: Invoice
+table: invoice
+fields:
+  ### Owner's auth user id — every query is scoped to this.
+  ownerId: String
+  ### Human invoice number, e.g. INV-0007.
+  number: String
+  customerId: int
+  ### Total in minor units (cents).
+  amountCents: int
+  currency: String
+  ### Free-text notes / work description.
+  notes: String?
+  status: InvoiceStatus
+  issueDate: DateTime
+  dueDate: DateTime
+  ### Set when the invoice is sent (chase clock starts here).
+  sentAt: DateTime?
+  createdAt: DateTime
+

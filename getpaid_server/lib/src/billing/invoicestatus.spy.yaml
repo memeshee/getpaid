@@ -1,0 +1,5 @@
+enum: InvoiceStatus
+values:
+  - draft
+  - sent
+  - paid

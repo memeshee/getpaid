@@ -1,0 +1,5 @@
+enum: ReminderTier
+values:
+  - nudge
+  - firm
+  - finalNotice

@@ -1,0 +1,8 @@
+class: InvoiceThread
+fields:
+  invoice: Invoice
+  client: Customer?
+  items: List<InvoiceItem>
+  reminders: List<Reminder>
+  payments: List<Payment>
+

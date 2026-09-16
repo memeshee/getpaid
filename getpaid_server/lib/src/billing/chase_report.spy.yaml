@@ -1,0 +1,5 @@
+class: ChaseReport
+fields:
+  virtualNow: DateTime
+  remindersSent: int
+  tiers: List<ReminderTier>
