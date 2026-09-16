@@ -29,7 +29,9 @@ class GetPaidApp extends StatelessWidget {
       title: 'GetPaid — invoices that chase themselves',
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
-      themeMode: ThemeMode.system,
+      // Locked to light: the seeded dark scheme renders washed-out in some
+      // browsers (observed: Edge). Consistent first impression beats theming.
+      themeMode: ThemeMode.light,
       home: const SignInScreen(child: InvoiceListScreen()),
     );
   }
