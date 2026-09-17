@@ -11,8 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERSION: '4.0.0'
-      SERVERPOD_PASSWORD_database: '***REMOVED***'
-      SERVERPOD_PASSWORD_redis: '***REMOVED***'
+      # Ephemeral CI-only credentials for localhost test containers.
+      # Must match the test services in getpaid_server/docker-compose.yaml.
+      POSTGRES_TEST_PASSWORD: 'postgres'
+      REDIS_TEST_PASSWORD: 'redis'
+      SERVERPOD_PASSWORD_database: 'postgres'
+      SERVERPOD_PASSWORD_redis: 'redis'
 
     steps:
       - uses: actions/checkout@v4
