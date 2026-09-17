@@ -1,6 +1,6 @@
 # GetPaid — invoices that chase themselves
 
-**Live:** https://getpaid.serverpod.space/ · **Demo video (66s):** [demo-video-getpaid.mp4](./demo-video-getpaid.mp4)
+**Live:** https://getpaid.serverpod.space/ · **Demo video (68s):** [demo-video-getpaid.mp4](./demo-video-getpaid.mp4)
 · **Judge login:** `kiter2509@gmail.com` / `Judge-demo-123` (fresh DRAFT invoice waiting, plus one settled invoice showing the full story)
 
 ## Thesis
