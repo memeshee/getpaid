@@ -1,7 +1,7 @@
 # GetPaid — invoices that chase themselves
 
-**Live:** https://getpaid.serverpod.space/ · **Demo video (66s):** `demo-video-getpaid.mp4`
-· **Judge login:** `kiter2509@gmail.com` / `Judge-demo-123` (fresh DRAFT invoice waiting)
+**Live:** https://getpaid.serverpod.space/ · **Demo video (66s):** [demo-video-getpaid.mp4](./demo-video-getpaid.mp4)
+· **Judge login:** `kiter2509@gmail.com` / `Judge-demo-123` (fresh DRAFT invoice waiting, plus one settled invoice showing the full story)
 
 ## Thesis
 
@@ -35,10 +35,11 @@ reminders bolted on; it's a **chase engine with an invoice attached**.
   customer/invoice CRUD, `sendInvoice`, `getThread`, `markPaid`,
   `simulate(daysAhead)`.
 - **Serverpod future calls** — the real-time chase engine. `sendInvoice`
-  schedules three idempotent touches (+3/+7/+14d); `markPaid` cancels them.
-  At-least-once delivery is safe by construction: sent tiers are never
-  re-sent. The judge time-lapse calls the same pure `dueTiers(invoice, now)`
-  core with a virtual clock — one code path, two clocks.
+  schedules three idempotent touches (+3/+7/+14d, one scheduled call per
+  tier); `markPaid` cancels them. At-least-once delivery is safe by
+  construction: sent tiers are never re-sent. The judge time-lapse calls
+  the same `runChaseStep(session, now: ...)` core as the production
+  scheduler, but with a virtual clock — one code path, two clocks.
 - **Serverpod database**: `Customer`, `Invoice`, `InvoiceItem`, `Reminder`,
   `Payment` tables with versioned migrations. Every query is scoped to the
   caller's auth identity — users can never see each other's invoices
@@ -51,7 +52,11 @@ reminders bolted on; it's a **chase engine with an invoice attached**.
   Insights + web) with managed Postgres. Deploy: `serverpod cloud deploy
   -p getpaid`.
 - **Flutter**: one codebase — `getpaid_flutter` builds the mobile app and
-  the web app; the server serves the web build itself from `/`.
+  the web app; the server serves the web build itself from `/`. The home
+  screen is an outstanding-money dashboard (total, open/overdue counts,
+  per-client names); the invoice thread is a timeline where every reminder
+  has a copy-to-clipboard button, so a freelancer can paste a chase touch
+  into any email client today.
 
 ## Vision & roadmap
 
@@ -74,7 +79,8 @@ accounting-suite depth. The wedge is the chase, not the paperwork.
 
 ## Run it locally
 
-Requirements: Flutter 3.38+, Dart 3.13+, Docker.
+Requirements: Flutter 3.47+, Dart 3.13+, Docker, Serverpod CLI 4.0.0
+(`dart pub global activate serverpod_cli 4.0.0`).
 
 ```bash
 # 1. Database + cache
@@ -95,17 +101,18 @@ printed in the server console log (`Registration code for <email>`).
 
 ## Prove the backend without the UI
 
+Unit tests live in the repo (chase schedule, escalating copy, identifier
+scheme):
+
 ```bash
-cd smoke && dart pub get
-dart authed.dart   # registers 2 users, runs the full loop, proves isolation
+cd getpaid_server && dart test test/chase_logic_test.dart
 ```
 
-Expected: both users register, Bob sees 0 of Alice's invoices and is
+CI (`.github/workflows/tests.yml`) additionally boots Postgres + Redis and
+runs the full generated integration suite. Multi-user isolation is proven
+there and by `smoke/authed.dart`: Bob sees 0 of Alice's invoices and is
 blocked from her thread, Alice's `simulate(15)` fires
 `nudge, firm, finalNotice`, payment issues receipt `GP-1-1`.
-
-`seed_demo.dart` re-creates the judge demo state (one customer, one DRAFT
-invoice) on a local server.
 
 ## Project layout
 
