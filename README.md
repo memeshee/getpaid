@@ -58,6 +58,36 @@ reminders bolted on; it's a **chase engine with an invoice attached**.
   has a copy-to-clipboard button, so a freelancer can paste a chase touch
   into any email client today.
 
+## Architecture
+
+```mermaid
+flowchart TB
+    App[Flutter app<br/>mobile + web<br/>dashboard + invoice timeline] --> Server[Serverpod server<br/>getpaid.serverpod.space]
+
+    Server --> EP[Endpoints<br/>invoice CRUD · sendInvoice<br/>getThread · markPaid · simulate]
+    Server --> FC[Future calls<br/>chase_future_call<br/>one scheduled call per tier]
+    Server --> Auth[Auth · email IdP + JWT<br/>every query scoped to caller]
+
+    EP --> DB[(Postgres<br/>Customer · Invoice · Reminder · Payment)]
+    FC --> DB
+
+    Send[sendInvoice] --> Sched[schedule +3/+7/+14d touches]
+    Sched --> FC
+    Paid[markPaid] --> Cancel[cancel pending touches<br/>issue receipt GP-n-n]
+    Cancel --> DB
+
+    Sim[simulate +days<br/>judge time-lapse] --> Core[runChaseStep core<br/>virtual clock]
+    FC --> Core[runChaseStep core<br/>production clock]
+
+    style Core fill:#1d4ed8,color:#fff
+```
+
+One code path, two clocks: the production scheduler and the judge
+time-lapse both run `runChaseStep` — the only difference is where `now`
+comes from. Idempotent tiers (a sent tier is never re-sent) make
+at-least-once delivery safe, and `markPaid` cancels pending touches so a
+paying client is never dunned.
+
 ## Vision & roadmap
 
 The hackathon slice proves the loop: send → chase → paid → receipt. What it
